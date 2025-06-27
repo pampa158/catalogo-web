@@ -22,7 +22,7 @@ Las credenciales se configuran en el archivo `.env` (no incluido en este reposit
 git clone https://github.com/pampa158/catalogo-web.git
 cd catalogo-web
 
-2. Actualización de repositorio (commit y push)
+2. Actualización de repositorio (commit y push):
 git add .
 git commit -m "Comentario"
 git push
