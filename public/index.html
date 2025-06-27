@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Catálogo</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <h1>Catálogo de Productos</h1>
+    <div id="catalogo" class="grid"></div>
+
+    <script>
+    fetch('/api/productos')
+        .then(res => res.json())
+        .then(productos => {
+        const cont = document.getElementById('catalogo');
+        productos.forEach(p => {
+            cont.innerHTML += `
+            <div class="card">
+                <img src="${p.imagen}" alt="${p.titulo}" />
+                <h2>${p.titulo}</h2>
+                <p>${p.descripcion}</p>
+            </div>`;
+        });
+        });
+    </script>
+</body>
+</html>

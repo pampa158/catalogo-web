@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <h1>Admin - Catálogo</h1>
+    <div id="login">
+    <input placeholder="Usuario" id="user" />
+    <input placeholder="Contraseña" id="pass" type="password" />
+    <button onclick="login()">Ingresar</button>
+    </div>
+
+    <div id="admin-panel" style="display:none">
+    <form onsubmit="agregar(event)">
+        <input placeholder="Título" id="titulo" required />
+        <input placeholder="Descripción" id="desc" required />
+        <input placeholder="URL de imagen" id="img" required />
+        <button>Agregar</button>
+    </form>
+    <hr />
+    <div id="lista-productos"></div>
+    </div>
+
+    <script>
+    let admin = false;
+
+    function login() {
+        fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: user.value, pass: pass.value })
+        }).then(res => {
+        if (!res.ok) return alert('Acceso denegado');
+        admin = true;
+        document.getElementById('login').style.display = 'none';
+        document.getElementById('admin-panel').style.display = 'block';
+        cargarProductos();
+        });
+    }
+
+    function cargarProductos() {
+        fetch('/api/productos')
+        .then(res => res.json())
+        .then(productos => {
+            const cont = document.getElementById('lista-productos');
+            cont.innerHTML = '';
+            productos.forEach(p => {
+            cont.innerHTML += `
+                <div>
+                <img src="${p.imagen}" width="100" />
+                <strong>${p.titulo}</strong> - ${p.descripcion}
+                <button onclick="toggle(${p.id})">Ocultar/Mostrar</button>
+                <button onclick="borrar(${p.id})">Eliminar</button>
+                </div>`;
+            });
+        });
+    }
+
+    function agregar(e) {
+        e.preventDefault();
+        fetch('/api/productos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            titulo: titulo.value,
+            descripcion: desc.value,
+            imagen: img.value,
+            habilitado: true
+        })
+        }).then(() => {
+        titulo.value = desc.value = img.value = '';
+        cargarProductos();
+        });
+    }
+
+    function borrar(id) {
+        fetch(`/api/productos/${id}`, { method: 'DELETE' })
+        .then(cargarProductos);
+    }
+
+    function toggle(id) {
+        fetch(`/api/productos/${id}`, { method: 'PATCH' })
+        .then(cargarProductos);
+    }
+    </script>
+</body>
+</html>
