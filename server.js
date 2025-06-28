@@ -11,12 +11,19 @@ app.use(express.static('public'));
 
 const PRODUCTOS_PATH = './productos.json';
 
-app.get('/api/productos', (req, res) => {
+app.get('/api/productos/todos', (req, res) => {
     if (!fs.existsSync(PRODUCTOS_PATH)) return res.json([]);
-    const data = fs.readFileSync(PRODUCTOS_PATH);
-    const productos = JSON.parse(data).filter(p => p.habilitado);
+    const productos = JSON.parse(fs.readFileSync(PRODUCTOS_PATH));
     res.json(productos);
 });
+
+app.get('/api/productos', (req, res) => {
+    if (!fs.existsSync(PRODUCTOS_PATH)) return res.json([]);
+    const productos = JSON.parse(fs.readFileSync(PRODUCTOS_PATH));
+    const visibles = productos.filter(p => p.habilitado);
+    res.json(visibles);
+});
+
 
 app.post('/api/login', (req, res) => {
     const { user, pass } = req.body;
@@ -47,18 +54,16 @@ app.delete('/api/productos/:id', (req, res) => {
     res.json({ success: true });
 });
 
-app.patch('/api/productos/:id', (req, res) => {
+
+app.post('/api/productos/:id/toggle', (req, res) => {
     const id = parseInt(req.params.id);
-    if (!fs.existsSync(PRODUCTOS_PATH)) return res.status(404).json({ error: 'No encontrado' });
-    let data = JSON.parse(fs.readFileSync(PRODUCTOS_PATH));
-    const index = data.findIndex(p => p.id === id);
-    if (index !== -1) {
-    data[index].habilitado = !data[index].habilitado;
-    fs.writeFileSync(PRODUCTOS_PATH, JSON.stringify(data, null, 2));
-    res.json(data[index]);
-    } else {
-    res.status(404).json({ error: 'Producto no encontrado' });
-    }
+    let productos = JSON.parse(fs.readFileSync(PRODUCTOS_PATH));
+    const producto = productos.find(p => p.id === id);
+    if (!producto) return res.status(404).json({ error: 'Producto no encontrado' });
+    
+    producto.habilitado = !producto.habilitado;  // Cambia el estado
+    fs.writeFileSync(PRODUCTOS_PATH, JSON.stringify(productos, null, 2));
+    res.json({ success: true });
 });
 
 app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));

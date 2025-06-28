@@ -32,7 +32,8 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user: user.value, pass: pass.value })
-        }).then(res => {
+        })
+        .then(res => {
         if (!res.ok) return alert('Acceso denegado');
         admin = true;
         document.getElementById('login').style.display = 'none';
@@ -42,20 +43,22 @@
     }
 
     function cargarProductos() {
-        fetch('/api/productos')
-        .then(res => res.json())
-        .then(productos => {
-            const cont = document.getElementById('lista-productos');
-            cont.innerHTML = '';
-            productos.forEach(p => {
-            cont.innerHTML += `
-                <div>
-                <img src="${p.imagen}" width="100" />
-                <strong>${p.titulo}</strong> - ${p.descripcion}
-                <button onclick="toggle(${p.id})">Ocultar/Mostrar</button>
-                <button onclick="borrar(${p.id})">Eliminar</button>
-                </div>`;
-            });
+        fetch('/api/productos/todos')
+            .then(res => res.json())
+            .then(productos => {
+                const cont = document.getElementById('lista-productos');
+                cont.innerHTML = '';
+                productos.forEach(p => {
+                cont.innerHTML += `
+                    <div>
+                        <img src="${p.imagen}" width="100" />
+                        <strong>${p.titulo}</strong> - ${p.descripcion}
+                        <button onclick="toggle(${p.id})">
+                            ${p.habilitado ? '✅ Habilitado' : '❌ Oculto'}
+                        </button>
+                        <button onclick="borrar(${p.id})">🗑 Eliminar</button>
+                    </div>`;
+                });
         });
     }
 
@@ -82,9 +85,13 @@
     }
 
     function toggle(id) {
-        fetch(`/api/productos/${id}`, { method: 'PATCH' })
-        .then(cargarProductos);
-    }
+        fetch(`/api/productos/${id}/toggle`, { method: 'POST' })
+            .then(res => {
+                if (!res.ok) return alert('Error al actualizar');
+                cargarProductos();  // Recarga la lista completa, que debe incluir productos ocultos
+    });
+}
+
     </script>
 </body>
 </html>

@@ -10,19 +10,23 @@
     <div id="catalogo" class="grid"></div>
 
     <script>
+    window.onload = () => {
     fetch('/api/productos')
         .then(res => res.json())
         .then(productos => {
         const cont = document.getElementById('catalogo');
         productos.forEach(p => {
             cont.innerHTML += `
-            <div class="card">
-                <img src="${p.imagen}" alt="${p.titulo}" />
-                <h2>${p.titulo}</h2>
+            <div>
+                <img src="${p.imagen}" width="200" />
+                <h3>${p.titulo}</h3>
                 <p>${p.descripcion}</p>
             </div>`;
         });
-        });
+    });
+};
+
+
     </script>
 </body>
 </html>
